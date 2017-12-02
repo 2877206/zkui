@@ -43,23 +43,30 @@ public class AuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
+        System.out.println("doFilter1");
+
         if (!request.getRequestURI().contains("/login") && !request.getRequestURI().contains("/acd/appconfig")) {
+            System.out.println("doFilter2");
             RequestDispatcher dispatcher;
             HttpSession session = request.getSession();
             if (session != null) {
+                System.out.println("doFilter3");
                 if (session.getAttribute("authName") == null || session.getAttribute("authRole") == null) {
+                    System.out.println("doFilter4");
                     response.sendRedirect("/login");
                     return;
                 }
 
             } else {
+                System.out.println("doFilter5");
                 request.setAttribute("fail_msg", "Session timed out!");
                 dispatcher = request.getRequestDispatcher("/Login");
                 dispatcher.forward(request, response);
+                System.out.println("doFilter6");
                 return;
             }
         }
-
+        System.out.println("doFilter7");
         fc.doFilter(req, res);
     }
 
