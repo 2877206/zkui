@@ -65,25 +65,19 @@ public class Login extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.debug("Login Post Action!");
-        logger.info("start1");
         try {
             Properties globalProps = (Properties) getServletContext().getAttribute("globalProps");
-            logger.info("start2");
             Map<String, Object> templateParam = new HashMap<>();
             HttpSession session = request.getSession(true);
             session.setMaxInactiveInterval(Integer.valueOf(globalProps.getProperty("sessionTimeout")));
-            logger.info("start3");
             //TODO: Implement custom authentication logic if required.
             String username = request.getParameter("username");
             String password = request.getParameter("password");
-            logger.info("start4");
             String role = null;
             Boolean authenticated = false;
             //if ldap is provided then it overrides roleset.
             if (globalProps.getProperty("ldapAuth").equals("true")) {
-                logger.info("start5");
                 authenticated = new LdapAuth().authenticateUser(globalProps.getProperty("ldapUrl"), username, password, globalProps.getProperty("ldapDomain"));
-                logger.info("start6");
                 if (authenticated) {
                     JSONArray jsonRoleSet = (JSONArray) ((JSONObject) new JSONParser().parse(globalProps.getProperty("ldapRoleSet"))).get("users");
                     for (Iterator it = jsonRoleSet.iterator(); it.hasNext();) {
@@ -91,7 +85,6 @@ public class Login extends HttpServlet {
                         if (jsonUser.get("username") != null && jsonUser.get("username").equals("*")) {
                             role = (String) jsonUser.get("role");
                         }
-                        logger.info("start7");
                         if (jsonUser.get("username") != null && jsonUser.get("username").equals(username)) {
                             role = (String) jsonUser.get("role");
                         }
@@ -102,7 +95,6 @@ public class Login extends HttpServlet {
 
                 }
             } else {
-                logger.info("start8");
                 JSONArray jsonRoleSet = (JSONArray) ((JSONObject) new JSONParser().parse(globalProps.getProperty("userSet"))).get("users");
                 for (Iterator it = jsonRoleSet.iterator(); it.hasNext();) {
                     JSONObject jsonUser = (JSONObject) it.next();
@@ -111,16 +103,13 @@ public class Login extends HttpServlet {
                         role = (String) jsonUser.get("role");
                     }
                 }
-                logger.info("start9");
             }
             if (authenticated) {
-                logger.info("start10");
                 logger.info("Login successful: " + username);
                 session.setAttribute("authName", username);
                 session.setAttribute("authRole", role);
                 response.sendRedirect("/home");
             } else {
-                logger.info("start11");
                 session.setAttribute("flashMsg", "Invalid Login");
                 ServletUtil.INSTANCE.renderHtml(request, response, templateParam, "login.ftl.html");
             }
